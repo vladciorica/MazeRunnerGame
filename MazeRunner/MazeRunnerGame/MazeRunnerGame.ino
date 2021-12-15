@@ -198,6 +198,20 @@ void setup() {
   cursorsSetup();
 }
 
+void lcdSetup()
+{
+  lcd.begin(16, 2);
+  lcd.createChar(0, arrow);
+  lcd.createChar(1, down);
+  lcd.createChar(2, up);
+  lcd.setCursor(3, 0);
+  lcd.print("Welcome to");
+  lcd.setCursor(3, 1);
+  lcd.print(gameName);
+  delay(2000);
+  lcd.clear();
+}
+
 void matrixSetup()
 {
   lc.shutdown(0, false); // turn off power saving, enables display
@@ -348,21 +362,7 @@ void loadDataEEPROM()
   }
 }
 
-void lcdSetup()
-{
-  lcd.begin(16, 2);
-  lcd.createChar(0, arrow);
-  lcd.createChar(1, down);
-  lcd.createChar(2, up);
-  lcd.setCursor(3, 0);
-  lcd.print("Welcome to");
-  lcd.setCursor(3, 1);
-  lcd.print(gameName);
-  delay(1000);
-  //updateSettings();
-  lcd.clear();
-}
-
+// function that will print the menu data
 void printMenu() {
   for (int i = 0 ; i < menuPositionsSize; i++)
   {
@@ -373,6 +373,7 @@ void printMenu() {
   lcd.write(byte(0));
 }
 
+// function that will help us to navigate through the menu
 void moveMenuCursor() {
   int xValue = analogRead(xPin);
   int yValue = analogRead(yPin);
@@ -417,7 +418,7 @@ void moveMenuCursor() {
 
 }
 
-bool buttonPressed()
+bool buttonPressed() // function that returns true if the joystick button is pressed or false otherwise
 {
   lastState = switchState;
   switchState = digitalRead(swPin);
@@ -428,13 +429,16 @@ bool buttonPressed()
   return false;
 }
 
-
+/// general Menu logic
+/// here we will generate all the data which will be shown on the lcd
 void displayMenu() {
+  /// if we are on the main menu and the button is pressed then we have to enter in the current selection
   if (buttonPressed() == true && currentCursorMenuPos != -1)
   {
     lcd.clear();
     lastcurrentCursorMenuPos = currentCursorMenuPos;
     currentCursorMenuPos = -1;
+    /// for every selectuib from the menu we have to to some intializations
     if (lastcurrentCursorMenuPos == 0)
     {
       lcd.clear();
@@ -465,6 +469,7 @@ void displayMenu() {
       lastScorePos = 0;
     }
   }
+  /// we print the main menu if we did not select any field
   if (currentCursorMenuPos != -1)
   {
     printMenu();
@@ -472,6 +477,7 @@ void displayMenu() {
   }
   else if (currentCursorMenuPos == -1)
   {
+    /// otherwise, we see what field we chose and develop the logic from that field
     if (lastcurrentCursorMenuPos == 0)
     {
       inGame = true;
@@ -480,6 +486,7 @@ void displayMenu() {
     if (lastcurrentCursorMenuPos == 1)
     {
       displaySettings();
+      // lockedIn will tell us if we chose a field from settings or not
       if (buttonPressed() == true)
       {
         if (lockedIn == true)
@@ -519,6 +526,7 @@ void displayMenu() {
     }
     if (lastcurrentCursorMenuPos == 2)
     {
+      // we press the button to exit info
       displayInfo();
       if (buttonPressed() == true)
       {
@@ -542,6 +550,7 @@ void displayMenu() {
   }
 }
 
+// function which will clear our highscores
 void clearHighScore()
 {
   for (int i = 0; i < EEPROMNameAddress + 9; i++)
@@ -553,6 +562,7 @@ void clearHighScore()
   }
 }
 
+// function that will help us to navigate in the score section
 void moveScoreCursor()
 {
   int xValue = analogRead(xPin);
@@ -595,6 +605,8 @@ void moveScoreCursor()
   }
 }
 
+// function that will print the score section on the lcd
+
 void printScore()
 {
 
@@ -631,6 +643,7 @@ void displayScore()
   moveScoreCursor();
 }
 
+// here we update the scores
 void updateScore()
 {
   for (int i = 0 ; i < 3; i++)
@@ -638,6 +651,7 @@ void updateScore()
   Serial.println(currentUser);
   for (int i = 0 ; i < scoresSize - 1; i++)
   {
+    // if final score is lower that the score from highScore or it is not updated at all, we move all the scores down, and put on the current position the final score
     if (totalScore < highScore[i] or highScore[i] == 0)
     {
       for (int j = scoresSize - 2; j > i; j--)
@@ -779,16 +793,14 @@ void generateMatrix() //generate matrix for the new level
     }
   }
   /*for (int i = 0 ; i < matrixSize; i++)
-    for (int j = 0; j < matrixSize; j++)
-      matrix[i][j] = levelStartMatrix[currentLevel - 1][currentMap][i][j];
+      for (int j = 0; j < matrixSize; j++)
+        matrix[i][j] = levelStartMatrix[currentLevel - 1][currentMap][i][j];
   */
-  /*for (int i = 0 ; i < matrixSize; i++)
-    for (int j = 0; j < matrixSize; j++)
-      matrix[i][j] = levelStartMatrix[i][j];*/
 
   updateDisplay();
 }
 
+// here we print the infos in the game
 void printGame()
 {
   int currentScore = totalScore + gameScore;
@@ -799,6 +811,8 @@ void printGame()
   lcd.print("Score: ");
   lcd.print(currentScore);
 }
+
+// here we print the infos at the start of the game/level
 void printBeforeGame()
 {
   lcd.setCursor(2, 0);
@@ -809,6 +823,7 @@ void printBeforeGame()
   //Serial.println(gameScore);
 }
 
+// here we print the infos at the end of the game
 void printEndGame()
 {
   if (newHighScore == false)
@@ -834,6 +849,8 @@ void printEndGame()
     lcd.print("Press to go back");
   }
 }
+
+// game menu logic
 void displayGame()
 {
   if (gameEnded == true)
@@ -885,7 +902,7 @@ void displayGame()
   }
 }
 
-
+// here we update the settings
 void updateSettings()
 {
   analogWrite(contrastPin, contrastValues[contrastValue]);
@@ -896,11 +913,13 @@ void updateSettings()
   writeIntIntoEEPROM(23, matrixBrightnessValue);
 }
 
+// here we change the settings values
 void modifySettings()
 {
   int auxValue;
   char auxName[4];
   int Size = 5;
+  // if we change the name
   if (currentSettingsPos == 0)
   {
     strcpy(auxName, currentUser);
@@ -919,6 +938,7 @@ void modifySettings()
       joyMoved2 = true;
     }
 
+    // we know we have the name from 6th to 8th position in the first row
     if (userCol < 6)
       userCol = 8;
     if (userCol > 8)
@@ -955,8 +975,8 @@ void modifySettings()
         joyMoved2 = false;
       }
     }
-
   }
+  // otherwise we have to change and integer value
   else {
     if (currentSettingsPos == 1)
       auxValue = currentLevel;
@@ -981,6 +1001,7 @@ void modifySettings()
       joyMoved = true;
     }
 
+    // for the starting level we have other boundaries
     if (currentSettingsPos == 1)
     {
       if (auxValue > Size)
@@ -1001,9 +1022,7 @@ void modifySettings()
     if (auxValue != lastValue)
     {
       if (currentSettingsPos == 1)
-      {
         currentLevel = auxValue;
-      }
       if (currentSettingsPos == 2)
         contrastValue = auxValue;
       if (currentSettingsPos == 3)
@@ -1013,6 +1032,7 @@ void modifySettings()
         matrixBrightnessValue = auxValue;
         lightDisplay();
       }
+      // if something has changed we update the settings
       updateSettings();
     }
   }
@@ -1020,6 +1040,7 @@ void modifySettings()
 
 void printSettings()
 {
+  // here we have the blink on the current field from settings
   if (lockedIn == false)
   {
     if (millis() - lastBlink > blinkInterval)
@@ -1038,6 +1059,7 @@ void printSettings()
     lcd.setCursor(settingsCursorPos[currentSettingsPos].lcdCol, settingsCursorPos[currentSettingsPos].lcdRow);
     lcd.write(byte(0));
   }
+  // here we print the sections from settings
   for (int i = lastSettingsPos ; i < min(lastSettingsPos + 2, settingsSize); i++)
   {
     lcd.setCursor(settingsCursorPos[i].lcdCol + 1, settingsCursorPos[i].lcdRow);
@@ -1065,6 +1087,7 @@ void printSettings()
   }
 }
 
+// here we move through the settings fields
 void moveSettingsCursor()
 {
   int xValue = analogRead(xPin);
@@ -1109,6 +1132,7 @@ void moveSettingsCursor()
 void displaySettings()
 {
   printSettings();
+  // just if we are lockedIn we can change the value of the settings
   if (lockedIn == true)
   {
     moveSettingsCursor();
@@ -1132,7 +1156,7 @@ void displayInfo()
 
 void loop() {
 
-  // display logic
+  //display logic
   // create menu for the game
   if (inMenu == true) {
     displayMenu();
@@ -1140,12 +1164,15 @@ void loop() {
   // game logic
   if (inGame == true)
   {
+    // if we are in game, then we update the score
     if (millis() % 10 == 0 && gameStarted == true && gameEnded == false)
     {
       gameScore = millis() / 10 - startScore;
     }
+    // if we arrived at the exit and we are in the game then we need to go to next level/map or finish game
     if (xPos == endXPos[currentLevel - 1][currentMap] && yPos == endYPos[currentLevel - 1][currentMap]  && gameStarted == true && gameEnded == false)
     {
+      // if we have more maps at the current level we go to the next map
       if (currentMap < numberOfMaps[currentLevel - 1] - 1)
       {
         currentMap++;
@@ -1157,7 +1184,7 @@ void loop() {
         lastWall = millis();
         generateMatrix();
       }
-      else
+      else // otherwise if we have levels to complete we go to the next level
       {
         if (currentLevel < maximumLevel)
         {
@@ -1167,7 +1194,7 @@ void loop() {
           totalScore += gameScore;
           currentMap = 0;
         }
-        else
+        else // otherwise we finish the game
         {
           lcd.clear();
           gameStarted = false;
@@ -1178,17 +1205,20 @@ void loop() {
         }
       }
     }
+    // if we are in the game
     if (gameStarted == true && gameEnded == false)
     {
+      // check if we moved on the matrix
       if (millis() - lastMoved > moveInterval)
       {
         updatePositions();
         lastMoved = millis();
       }
-      generateScoreBoost();
-      //generateWalls();
-      blinkCurrentBoost();
+      generateScoreBoost(); // generate a score boost at a random position
+      generateWalls(); // generate a wall at a random position
+      blinkCurrentBoost(); 
       blinkCurrentPos();
+      // if we moved on the matrix then we have to update the led matrix
       if (matrixChanged == true)
       {
         // matrix display logic
@@ -1201,6 +1231,7 @@ void loop() {
 
 void generateWalls()
 {
+  // generate a wall at a certain time interval
   if (millis() - lastWall > wallIntervals[currentLevel - 1])
   {
     if (xWall == -1 || yWall == -1)
@@ -1217,6 +1248,7 @@ void generateWalls()
     matrix[xWall][yWall] = 1;
     lc.setLed(0, xWall, yWall, matrix[xWall][yWall]);
   }
+  // the wall stays on the map a certain moment of time
   if (millis() - lastWall > wallTime[currentLevel - 1])
   {
     matrix[xWall][yWall] = 0;
@@ -1228,6 +1260,7 @@ void generateWalls()
 
 void generateScoreBoost()
 {
+  // generate a score boost at a certain time interval
   if (millis() - lastBoost > boostInterval)
   {
     if (xBoost == -1 || yBoost == -1)
@@ -1247,6 +1280,7 @@ void generateScoreBoost()
 
 void blinkCurrentPos()
 {
+  // we make our current position to blink to know where we are
   if (millis() - lastLedBlink > blinkLedInterval)
   {
     matrix[xPos][yPos] = !matrix[xPos][yPos];
@@ -1257,6 +1291,7 @@ void blinkCurrentPos()
 
 void blinkCurrentBoost()
 {
+  // the score boost stays on the map a fixed moment of time
   if (millis() - lastBoost < boostTime[currentLevel - 1])
   {
     if (millis() - lastBoostBlink > blinkBoostInterval && xBoost != -1 && yBoost != -1)
@@ -1339,6 +1374,7 @@ void updatePositions() {
       }
     }
   }
+  // if we are on a score boost
   if ((xLastPos != xPos || yLastPos != yPos) && (xPos == xBoost && yPos == yBoost))
   {
     matrix[xBoost][yBoost] = 0;
@@ -1348,6 +1384,7 @@ void updatePositions() {
     matrixChanged = true;
     matrix[xLastPos][yLastPos] = 0;
   }
+  // if we can go to this position
   else if ((xLastPos != xPos || yLastPos != yPos) && matrix[xPos][yPos] == 0) {
     matrixChanged = true;
     if (xPos != endXPos[currentLevel - 1][currentMap] || yPos != endYPos[currentLevel - 1][currentMap])
