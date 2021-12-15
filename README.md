@@ -6,6 +6,11 @@
 * LCD display
 * 1 joystick
 * 1 shift register 24 pins
+* Resistors
+* Ceramic capacitor
+* Wires
+* Breadboards
+* Buzzer
 
 ## Task
 
@@ -64,6 +69,27 @@ only be the current field of view of the player.
 – The levels must progress dynamically. Aka the level difficulty, score
 and other properties should be a function of the level number or time.
 menu should only be closed by the player, pressing a button.
+
+## Game description
+There are 5 levels and every level consists of one or multiple maps. You are located at a random start position and you have to find the exit of every map. To make the things more complicated at every level there are some obstacles (random walls) that you have to avoid, or bonus potions that improve your score.
+The score is the time in which you manage to escape from the maze. 
+
+FIND YOUR WAY HOME OR BAD THINGS WILL HAPPEN!!
+
+## Inspiration
+
+Some years ago I've watched the movie Maze Runner, and now I thought that I could transpose it into a game. It's always good to have some fun.
+
+## Menu
+
+* Welcome message
+* Menu: Start, Settings, Score, Info
+* Info: some info about the game and the creator
+* Score: there are showed the best scores of all time
+* Settings: there you can change your name, constrast, lcd brightness, matrix brightness, starting level and clear scores
+* Start: here you can start the game
+* Game: there you will see the current score and the current level
+
 
 ## Setup Pictures
 
