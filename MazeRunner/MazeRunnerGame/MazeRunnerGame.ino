@@ -7,23 +7,23 @@ const char authorName[] = "Ciorica Vlad";
 const char githubLink[] = "github.com/vladciorica/MazeRunner";
 
 // pins
-const int dinPin = 12;
-const int clockPin = 11;
-const int loadPin = 10;
+const int  dinPin = 12;
+const int  clockPin = 11;
+const int  loadPin = 10;
 
 
-const int RS = 7;
-const int enable = 9;
-const int d4 = 4;
-const int d5 = 3;
-const int d6 = 2;
-const int d7 = 8;
-const int brightnessPin = 5;
-const int contrastPin = 6;
+const int  RS = 7;
+const int  enable = 9;
+const int  d4 = 4;
+const int  d5 = 3;
+const int  d6 = 2;
+const int  d7 = 8;
+const int  brightnessPin = 5;
+const int  contrastPin = 6;
 
-const int xPin = A0;
-const int yPin = A1;
-const int swPin = 0;
+const int  xPin = A0;
+const int  yPin = A1;
+const int  swPin = 0;
 
 // data structures
 LedControl lc = LedControl(dinPin, clockPin, loadPin, 1); //DIN, CLK, LOAD, No. DRIVER
@@ -32,11 +32,12 @@ LiquidCrystal lcd(RS, enable, d4, d5, d6, d7);
 
 struct cursorPosition {
   int lcdRow, lcdCol;
-  char Name[20];
+  char* Name;
 };
 
+
 // menu stuff
-const int menuPositionsSize = 4;
+const int  menuPositionsSize = 4;
 cursorPosition menuCursorPos[menuPositionsSize];
 int currentCursorMenuPos = 0;
 int lastcurrentCursorMenuPos = 0;
@@ -76,26 +77,26 @@ byte up[8] = {
 };
 
 // menu settings stuff
-const int settingsSize = 6;
+const int  settingsSize = 7;
 cursorPosition settingsCursorPos[settingsSize];
 int currentSettingsPos = 0, lastSettingsPos = 0;
 char currentUser[5] = "AAA\0";
 int contrastValue = 3, brightnessValue = 3, currentLevel = 1, matrixBrightnessValue = 1;
 int userCol = 6, userRow = 0;
-int constrastValues[] = {0, 50, 100, 150, 200, 250};
-int brightnessValues[] = {0, 50, 100, 150, 200, 250};
+const int contrastValues[] = {50, 75, 100, 120, 135, 150};
+const int brightnessValues[] = {0, 50, 100, 150, 200, 250};
 
 // menu game stuff
 const char startGameMessage1[] = "Press to";
 const char startGameMessage2[] = "start level ";
 bool gameStarted = false;
 bool gameEnded = false;
-int endXPos = 7, endYPos = 5;
-int maximumLevel = 1;
+const int  maximumLevel = 5;
 int gameScore = 0;
 int startScore = 0;
+int totalScore = 0;
 long long int lastLedBlink = 0;
-const int blinkLedInterval = 200;
+const int  blinkLedInterval = 200;
 
 byte xPos = 0;
 byte yPos = 0;
@@ -103,15 +104,18 @@ byte yPos = 0;
 byte xLastPos = 0;
 byte yLastPos = 0;
 
+struct cursorPosition1 {
+  int lcdRow, lcdCol;
+};
 // menu highscore stuff
 
-const int max_value = 10000;
+const int  max_value = 10000;
 int highScore[3] = {0, 0, 0};
 char highScoreNames[3][4] = {"UNK", "UNK", "UNK"};
 int currentScorePos = 0;
 int lastScorePos = 0;
-const int scoresSize = 4;
-cursorPosition scoreCursorPos[scoresSize];
+const int  scoresSize = 4;
+cursorPosition1 scoreCursorPos[scoresSize];
 bool newHighScore = false;;
 bool scoreUpdated = false;
 
@@ -120,8 +124,8 @@ bool scoreUpdated = false;
 bool switchState = LOW;
 bool lastState  = HIGH;
 
-const int minThreshold = 200;
-const int maxThreshold = 600;
+const int  minThreshold = 200;
+const int  maxThreshold = 600;
 
 bool joyMoved = false;
 bool joyMoved2 = false;
@@ -130,7 +134,7 @@ bool joyMoved2 = false;
 const byte matrixSize = 8;
 
 unsigned int long long lastMoved = 0;
-const int moveInterval = 150;
+const int  moveInterval = 150;
 
 bool matrixChanged = true;
 
@@ -145,25 +149,39 @@ bool matrix[matrixSize][matrixSize] = {
   {1, 1, 1, 1, 1, 0, 1, 1}
 };
 
-bool levelStartMatrix[matrixSize][matrixSize] = {
-  {1, 0, 1, 1, 1, 1, 1, 1},
-  {1, 0, 0, 0, 0, 0, 0, 1},
-  {1, 0, 1, 1, 1, 1, 1, 1},
-  {1, 0, 1, 0, 0, 0, 0, 1},
-  {1, 0, 1, 0, 1, 1, 0, 1},
-  {1, 0, 1, 0, 1, 0, 0, 1},
-  {1, 0, 0, 0, 1, 0, 1, 1},
-  {1, 1, 1, 1, 1, 0, 1, 1}
-};
+const int maximumMaps = 2;
+const short numberOfMaps[] = {1, 1, 1, 2, 2};
+const short startXPos[maximumLevel][maximumMaps] = {{0}, {0}, {0}, {0, 0}, {0, 0}};
+const short startYPos[maximumLevel][maximumMaps] = {{0}, {0}, {0}, {0, 0}, {0, 5}};
+const short endXPos[maximumLevel][maximumMaps] = {{7}, {7}, {7}, {7, 0}, {7, 7}};
+const short endYPos[maximumLevel][maximumMaps] = {{5}, {6}, {5}, {7, 7}, {5, 0}};
+int currentMap = 0;
 
 //general logic stuff
 bool inMenu = true;
 bool inGame = false;
-long long int blinkInterval = 300, lastBlink = 0;
+int blinkInterval = 300;
+long long lastBlink = 0;
+
+long long int lastBoost = 0;
+long long int lastBoostBlink = 0;
+int  blinkBoostInterval = 100;
+const int boostTime[] = {1500, 1500, 1250, 1000, 1000};
+const int boostInterval = 2000;
+const int boostScore[] = {100, 200, 300, 400, 550};
+short int xBoost = -1, yBoost = -1;
+
+long long int lastWall = 0;
+const int wallIntervals[] = {2000, 1750, 1500, 1250, 1000};
+const int wallTime[] = {1500, 1500, 1250, 1000, 750};
+short int xWall = -1, yWall = -1;
+
+
 bool lockedIn = true;
 bool blinkState = false;
 
 int EEPROMNameAddress = 6;
+int EEPROMSettingsAddress = 16;
 
 void setup() {
   pinMode(brightnessPin, OUTPUT);
@@ -171,12 +189,13 @@ void setup() {
   pinMode(swPin, INPUT_PULLUP);
   pinMode(xPin, INPUT);
   pinMode(yPin, INPUT);
-  
+
   Serial.begin(9600);
+  loadDataEEPROM();
+  updateSettings();
+  lcdSetup();
   matrixSetup();
   cursorsSetup();
-  lcdSetup();
-  loadDataEEPROM();
 }
 
 void matrixSetup()
@@ -189,34 +208,48 @@ void cursorsSetup()
 {
   menuCursorPos[0].lcdRow = 0;
   menuCursorPos[0].lcdCol = 0;
+  menuCursorPos[0].Name = new char[strlen("Start") + 1];
   strcpy(menuCursorPos[0].Name, "Start");
   menuCursorPos[1].lcdRow = 0;
   menuCursorPos[1].lcdCol = 7;
+  menuCursorPos[1].Name = new char[strlen("Settings") + 1];
   strcpy(menuCursorPos[1].Name, "Settings");
   menuCursorPos[2].lcdRow = 1;
   menuCursorPos[2].lcdCol = 7;
+  menuCursorPos[2].Name = new char[strlen("Info") + 1];
   strcpy(menuCursorPos[2].Name, "Info");
   menuCursorPos[3].lcdRow = 1;
   menuCursorPos[3].lcdCol = 0;
+  menuCursorPos[3].Name = new char[strlen("Score") + 1];
   strcpy(menuCursorPos[3].Name, "Score");
   settingsCursorPos[0].lcdRow = 0;
   settingsCursorPos[0].lcdCol = 0;
+  settingsCursorPos[0].Name = new char[strlen("Name: ") + 1];
   strcpy(settingsCursorPos[0].Name, "Name: ");
   settingsCursorPos[1].lcdRow = 1;
   settingsCursorPos[1].lcdCol = 0;
+  settingsCursorPos[1].Name = new char[strlen("Start level: ") + 1];
   strcpy(settingsCursorPos[1].Name, "Start level: ");
   settingsCursorPos[2].lcdRow = 0;
   settingsCursorPos[2].lcdCol = 0;
+  settingsCursorPos[2].Name = new char[strlen("Contrast: ") + 1];
   strcpy(settingsCursorPos[2].Name, "Contrast: ");
   settingsCursorPos[3].lcdRow = 1;
   settingsCursorPos[3].lcdCol = 0;
+  settingsCursorPos[3].Name = new char[strlen("Brightness: ") + 1];
   strcpy(settingsCursorPos[3].Name, "Brightness: ");
   settingsCursorPos[4].lcdRow = 0;
   settingsCursorPos[4].lcdCol = 0;
+  settingsCursorPos[4].Name = new char[strlen("Matrix Bness: ") + 1];
   strcpy(settingsCursorPos[4].Name, "Matrix Bness:");
   settingsCursorPos[5].lcdRow = 1;
   settingsCursorPos[5].lcdCol = 0;
-  strcpy(settingsCursorPos[5].Name, "Back");
+  settingsCursorPos[5].Name = new char[strlen("Clear score: ") + 1];
+  strcpy(settingsCursorPos[5].Name, "Clear Score");
+  settingsCursorPos[6].lcdRow = 0;
+  settingsCursorPos[6].lcdCol = 0;
+  settingsCursorPos[6].Name = new char[strlen("Back: ") + 1];
+  strcpy(settingsCursorPos[6].Name, "Back");
   scoreCursorPos[0].lcdRow = 0;
   scoreCursorPos[0].lcdCol = 0;
   scoreCursorPos[1].lcdRow = 1;
@@ -229,15 +262,15 @@ void cursorsSetup()
 
 void writeIntIntoEEPROM(int address, int number)
 {
-  EEPROM.write(address, number >> 8);
-  EEPROM.write(address + 1, number & 0xFF);
+  EEPROM.update(address, number >> 8);
+  EEPROM.update(address + 1, number & 0xFF);
 }
 
 void writeStringToEEPROM(int addrOffset, char* strToWrite)
 {
   for (int i = 0; i < scoresSize - 1; i++)
   {
-    EEPROM.write(addrOffset + i, strToWrite[i]);
+    EEPROM.update(addrOffset + i, strToWrite[i]);
   }
 }
 
@@ -259,13 +292,17 @@ int readIntFromEEPROM(int address)
 
 bool verifName(char *str)
 {
+  /*if(strlen(str) != 3)
+    return false;*/
   for (int i = 0 ; i < strlen(str); i++)
     if (str[i] < 'A' || str[i] > 'Z')
       return false;
   return true;
 }
+
 void loadDataEEPROM()
 {
+  int EEPROMvalue;
   for (int i = 0; i < EEPROMNameAddress; i += 2)
   {
     if (readIntFromEEPROM(i) > 0)
@@ -273,12 +310,41 @@ void loadDataEEPROM()
     else
       highScore[i / 2] = 0;
   }
-  for (int i = EEPROMNameAddress; i < EEPROMNameAddress + 3; i++)
+  for (int i = EEPROMNameAddress; i < EEPROMNameAddress + 7; i = i + 3)
   {
     if (verifName(readStringFromEEPROM(i)) == true)
-      strcpy(highScoreNames[i - EEPROMNameAddress], readStringFromEEPROM(i));
+      strcpy(highScoreNames[(i - EEPROMNameAddress) / 3], readStringFromEEPROM(i));
     else
-      strcpy(highScoreNames[i - EEPROMNameAddress],"UNK");
+      strcpy(highScoreNames[(i - EEPROMNameAddress) / 3], "UNK");
+  }
+  if (verifName(readStringFromEEPROM(EEPROMSettingsAddress)) == true)
+    strcpy(currentUser, readStringFromEEPROM(EEPROMSettingsAddress));
+  else
+    strcpy(currentUser, "AAA");
+  for (int i = 19; i < 25; i = i + 2)
+  {
+    EEPROMvalue = readIntFromEEPROM(i);
+    if (i == 19)
+    {
+      if (EEPROMvalue < 0 || EEPROMvalue > 5)
+        contrastValue = 3;
+      else
+        contrastValue = EEPROMvalue;
+    }
+    else if (i == 21)
+    {
+      if (EEPROMvalue < 0 || EEPROMvalue > 5)
+        brightnessValue = 3;
+      else
+        brightnessValue = EEPROMvalue;
+    }
+    else if (i == 23)
+    {
+      if (EEPROMvalue < 0 || EEPROMvalue > 5)
+        matrixBrightnessValue = 3;
+      else
+        matrixBrightnessValue = EEPROMvalue;
+    }
   }
 }
 
@@ -292,8 +358,8 @@ void lcdSetup()
   lcd.print("Welcome to");
   lcd.setCursor(3, 1);
   lcd.print(gameName);
-  delay(2000);
-  updateSettings();
+  delay(1000);
+  //updateSettings();
   lcd.clear();
 }
 
@@ -376,8 +442,9 @@ void displayMenu() {
       gameStarted = false;
       inGame = false;
       gameScore = 0;
-      xPos = 0;
-      yPos = 0;
+      totalScore = (currentLevel - 1) * 2000;
+      xPos = startXPos[currentLevel - 1][0];
+      yPos = startYPos[currentLevel - 1][0];
       scoreUpdated = false;
       newHighScore = false;
       // waitAnimationDisplay
@@ -424,6 +491,10 @@ void displayMenu() {
             currentCursorMenuPos = lastcurrentCursorMenuPos;
             return;
           }
+          else if (currentSettingsPos == settingsSize - 2)
+          {
+            clearHighScore();
+          }
           else
           {
             lockedIn = false;
@@ -438,6 +509,7 @@ void displayMenu() {
           userRow = 0;
           userCol = 6;
           updateSettings();
+          clearDisplay();
         }
       }
       if (lockedIn == false)
@@ -467,6 +539,17 @@ void displayMenu() {
         }
       }
     }
+  }
+}
+
+void clearHighScore()
+{
+  for (int i = 0; i < EEPROMNameAddress + 9; i++)
+    EEPROM.update(i, 0);
+  for (int i = 0; i < scoresSize - 1; i++)
+  {
+    highScore[i] = 0;
+    strcpy(highScoreNames[i], "UNK");
   }
 }
 
@@ -550,18 +633,21 @@ void displayScore()
 
 void updateScore()
 {
+  for (int i = 0 ; i < 3; i++)
+    Serial.println(highScoreNames[i]);
+  Serial.println(currentUser);
   for (int i = 0 ; i < scoresSize - 1; i++)
   {
-    if (gameScore < highScore[i] or highScore[i] == 0)
+    if (totalScore < highScore[i] or highScore[i] == 0)
     {
       for (int j = scoresSize - 2; j > i; j--)
       {
         highScore[j] = highScore[j - 1];
         strcpy(highScoreNames[j], highScoreNames[j - 1]);
       }
-      highScore[i] = gameScore;
+      highScore[i] = totalScore;
       strcpy(highScoreNames[i], currentUser);
-      if(i == 0)
+      if (i == 0)
         newHighScore = true;
       break;
     }
@@ -572,26 +658,146 @@ void updateScore()
   }
   for (int i = 0 ; i < scoresSize - 1; i++)
   {
-    writeStringToEEPROM(i + EEPROMNameAddress, highScoreNames[i]);
+    Serial.println(highScoreNames[i]);
+    writeStringToEEPROM(i * 3 + EEPROMNameAddress, highScoreNames[i]);
   }
+}
+
+inline void copyMatrix(bool levelStartMatrixAux[8][8])
+{
+  for (int i = 0 ; i < matrixSize; i++)
+    for (int j = 0 ; j < matrixSize; j++)
+      matrix[i][j] = levelStartMatrixAux[i][j];
 }
 
 void generateMatrix() //generate matrix for the new level
 {
-  for (int i = 0 ; i < matrixSize; i++)
+  xPos = startXPos[currentLevel - 1][currentMap];
+  yPos = startYPos[currentLevel - 1][currentMap];
+  if (currentLevel == 1)
+  {
+    bool levelStartMatrixAux[matrixSize][matrixSize] = {
+      {1, 0, 1, 1, 1, 1, 1, 1},
+      {1, 0, 0, 0, 0, 0, 0, 1},
+      {1, 0, 1, 1, 1, 1, 1, 1},
+      {1, 0, 1, 0, 0, 0, 0, 1},
+      {1, 0, 1, 0, 1, 1, 0, 1},
+      {1, 0, 1, 0, 1, 0, 0, 1},
+      {1, 0, 0, 0, 1, 0, 1, 1},
+      {1, 1, 1, 1, 1, 0, 1, 1}
+    };
+    copyMatrix(levelStartMatrixAux);
+  }
+  else if (currentLevel == 2)
+  {
+    bool levelStartMatrixAux[matrixSize][matrixSize] = {
+      {1, 1, 1, 1, 1, 1, 1, 1},
+      {0, 1, 0, 0, 0, 0, 0, 0},
+      {0, 1, 0, 1, 1, 1, 1, 0},
+      {0, 0, 0, 0, 1, 0, 0, 0},
+      {0, 1, 1, 1, 1, 0, 1, 0},
+      {0, 0, 0, 0, 1, 0, 1, 0},
+      {0, 1, 1, 1, 0, 0, 1, 0},
+      {0, 0, 0, 0, 0, 1, 0, 0}
+    };
+    copyMatrix(levelStartMatrixAux);
+  }
+  else if (currentLevel == 3)
+  {
+    bool levelStartMatrixAux[matrixSize][matrixSize] = {
+      {0, 1, 0, 0, 0, 0, 0, 0},
+      {0, 1, 0, 1, 1, 1, 1, 0},
+      {0, 1, 0, 0, 0, 0, 1, 0},
+      {0, 1, 0, 1, 1, 0, 1, 0},
+      {0, 1, 0, 1, 1, 1, 1, 0},
+      {0, 0, 0, 0, 1, 0, 0, 0},
+      {0, 1, 1, 0, 1, 0, 1, 0},
+      {0, 0, 0, 0, 1, 0, 1, 1}
+    };
+    copyMatrix(levelStartMatrixAux);
+  }
+  else if (currentLevel == 4)
+  {
+    if (currentMap == 0)
+    {
+      bool levelStartMatrixAux[matrixSize][matrixSize] = {
+        {1, 0, 1, 1, 1, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 1, 0},
+        {1, 0, 1, 1, 1, 1, 1, 0},
+        {1, 0, 0, 0, 0, 0, 1, 0},
+        {1, 0, 1, 0, 1, 0, 1, 0},
+        {1, 0, 1, 0, 1, 0, 1, 0},
+        {1, 0, 0, 0, 1, 0, 1, 1},
+        {1, 1, 1, 1, 1, 0, 0, 0}
+      };
+      copyMatrix(levelStartMatrixAux);
+    }
+    else if (currentMap == 1)
+    {
+      bool levelStartMatrixAux[matrixSize][matrixSize] = {
+        {1, 1, 1, 1, 1, 1, 1, 0},
+        {0, 1, 0, 1, 0, 0, 0, 0},
+        {0, 1, 0, 1, 0, 1, 1, 1},
+        {0, 1, 0, 1, 0, 1, 0, 1},
+        {0, 1, 0, 1, 0, 1, 0, 1},
+        {0, 1, 0, 1, 0, 1, 0, 1},
+        {0, 1, 0, 1, 0, 1, 0, 1},
+        {0, 0, 0, 0, 0, 0, 0, 1}
+      };
+      copyMatrix(levelStartMatrixAux);
+    }
+  }
+  else if (currentLevel == 5)
+  {
+    if (currentMap == 0)
+    {
+      bool levelStartMatrixAux[matrixSize][matrixSize] = {
+        {1, 0, 1, 1, 1, 1, 1, 1},
+        {1, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 1, 1, 1, 1, 1, 1},
+        {1, 0, 1, 0, 0, 0, 0, 1},
+        {1, 0, 1, 0, 1, 1, 0, 1},
+        {1, 0, 1, 0, 1, 0, 0, 1},
+        {1, 0, 0, 0, 1, 0, 1, 1},
+        {1, 1, 1, 1, 1, 0, 1, 1}
+      };
+      copyMatrix(levelStartMatrixAux);
+    }
+    else if (currentMap == 1)
+    {
+      bool levelStartMatrixAux[matrixSize][matrixSize] = {
+        {1, 0, 0, 0, 0, 1, 0, 0},
+        {1, 0, 1, 0, 1, 0, 1, 0},
+        {1, 0, 1, 0, 1, 0, 1, 0},
+        {1, 0, 1, 0, 0, 0, 1, 0},
+        {1, 0, 1, 0, 1, 1, 1, 0},
+        {1, 1, 1, 1, 1, 1, 1, 0},
+        {1, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 1, 1, 1, 1, 1, 1}
+      };
+      copyMatrix(levelStartMatrixAux);
+    }
+  }
+  /*for (int i = 0 ; i < matrixSize; i++)
     for (int j = 0; j < matrixSize; j++)
-      matrix[i][j] = levelStartMatrix[i][j];
+      matrix[i][j] = levelStartMatrix[currentLevel - 1][currentMap][i][j];
+  */
+  /*for (int i = 0 ; i < matrixSize; i++)
+    for (int j = 0; j < matrixSize; j++)
+      matrix[i][j] = levelStartMatrix[i][j];*/
+
   updateDisplay();
 }
 
 void printGame()
 {
+  int currentScore = totalScore + gameScore;
   lcd.setCursor(0, 0);
   lcd.print("Level: ");
   lcd.print(currentLevel);
   lcd.setCursor(0, 1);
   lcd.print("Score: ");
-  lcd.print(gameScore);
+  lcd.print(currentScore);
 }
 void printBeforeGame()
 {
@@ -609,7 +815,7 @@ void printEndGame()
   {
     lcd.setCursor(0, 0);
     lcd.print("You scored:");
-    lcd.print(gameScore);
+    lcd.print(totalScore);
     lcd.setCursor(0, 1);
     lcd.print("Press to go back");
   }
@@ -617,7 +823,7 @@ void printEndGame()
   {
     lcd.setCursor(0, 0);
     lcd.print("You scored:");
-    lcd.print(gameScore);
+    lcd.print(totalScore);
     lcd.print(" New Best Score");
     if (millis() - lastScroll > scrollInterval)
     {
@@ -646,8 +852,10 @@ void displayGame()
       gameStarted = false;
       inGame = false;
       gameScore = 0;
-      xPos = 0;
-      yPos = 0;
+      totalScore = 0;
+      xPos = startXPos[currentLevel - 1][currentMap];
+      yPos = startYPos[currentLevel - 1][currentMap];
+      currentMap = 0;
       clearDisplay();
     }
     return;
@@ -662,8 +870,13 @@ void displayGame()
       gameEnded = false;
       gameScore = 0;
       startScore = millis() / 10;
+      xBoost = -1;
+      yBoost = -1;
       generateMatrix();
       lastLedBlink = millis();
+      lastBoost = millis();
+      lastWall = millis();
+      currentMap = 0;
     }
   }
   else
@@ -672,11 +885,15 @@ void displayGame()
   }
 }
 
+
 void updateSettings()
 {
-  //analogWrite(contrastPin,constrastValues[constrastValue]);
-  //analogWrite(brightnessPin,brightnessValues[brightnessValue]);
+  analogWrite(contrastPin, contrastValues[contrastValue]);
+  analogWrite(brightnessPin, brightnessValues[brightnessValue]);
   lc.setIntensity(0, matrixBrightnessValue * 3);
+  writeIntIntoEEPROM(19, contrastValue);
+  writeIntIntoEEPROM(21, brightnessValue);
+  writeIntIntoEEPROM(23, matrixBrightnessValue);
 }
 
 void modifySettings()
@@ -732,7 +949,9 @@ void modifySettings()
 
       if (strcmp(auxName, currentUser))
       {
+        Serial.println(auxName);
         strcpy(currentUser, auxName);
+        writeStringToEEPROM(EEPROMSettingsAddress, auxName);
         joyMoved2 = false;
       }
     }
@@ -762,25 +981,39 @@ void modifySettings()
       joyMoved = true;
     }
 
-    if (auxValue > Size)
-      auxValue = 1;
-    if (auxValue < 0)
-      auxValue = Size;
-
+    if (currentSettingsPos == 1)
+    {
+      if (auxValue > Size)
+        auxValue = 1;
+      if (auxValue < 1)
+        auxValue = Size;
+    }
+    else
+    {
+      if (auxValue > Size)
+        auxValue = 0;
+      if (auxValue < 0)
+        auxValue = Size;
+    }
     if (xValue > minThreshold && xValue < maxThreshold)
       joyMoved = false;
 
     if (auxValue != lastValue)
     {
       if (currentSettingsPos == 1)
+      {
         currentLevel = auxValue;
+      }
       if (currentSettingsPos == 2)
         contrastValue = auxValue;
       if (currentSettingsPos == 3)
         brightnessValue = auxValue;
       if (currentSettingsPos == 4)
+      {
         matrixBrightnessValue = auxValue;
-      //updateSettings();
+        lightDisplay();
+      }
+      updateSettings();
     }
   }
 }
@@ -901,7 +1134,6 @@ void loop() {
 
   // display logic
   // create menu for the game
-
   if (inMenu == true) {
     displayMenu();
   }
@@ -912,18 +1144,38 @@ void loop() {
     {
       gameScore = millis() / 10 - startScore;
     }
-    if (xPos == endXPos && yPos == endYPos && gameEnded == false)
+    if (xPos == endXPos[currentLevel - 1][currentMap] && yPos == endYPos[currentLevel - 1][currentMap]  && gameStarted == true && gameEnded == false)
     {
-      if (currentLevel < maximumLevel)
+      if (currentMap < numberOfMaps[currentLevel - 1] - 1)
       {
-        currentLevel++;
-        gameStarted = false;
+        currentMap++;
+        xBoost = -1;
+        yBoost = -1;
+        xWall = -1;
+        yWall = -1;
+        lastBoost = millis();
+        lastWall = millis();
+        generateMatrix();
       }
       else
       {
-        lcd.clear();
-        gameStarted = false;
-        gameEnded = true;
+        if (currentLevel < maximumLevel)
+        {
+          lcd.clear();
+          currentLevel++;
+          gameStarted = false;
+          totalScore += gameScore;
+          currentMap = 0;
+        }
+        else
+        {
+          lcd.clear();
+          gameStarted = false;
+          gameEnded = true;
+          currentLevel = 1;
+          totalScore += gameScore;
+          currentMap = 0;
+        }
       }
     }
     if (gameStarted == true && gameEnded == false)
@@ -933,6 +1185,9 @@ void loop() {
         updatePositions();
         lastMoved = millis();
       }
+      generateScoreBoost();
+      //generateWalls();
+      blinkCurrentBoost();
       blinkCurrentPos();
       if (matrixChanged == true)
       {
@@ -944,24 +1199,99 @@ void loop() {
   }
 }
 
+void generateWalls()
+{
+  if (millis() - lastWall > wallIntervals[currentLevel - 1])
+  {
+    if (xWall == -1 || yWall == -1)
+    {
+      xWall = random(0, matrixSize);
+      yWall = random(0, matrixSize);
+      while (matrix[xWall][yWall] == 1 || (xWall == xPos && yWall == yPos) || (xWall == xBoost && yWall == yBoost))
+      {
+        xWall = random(0, matrixSize);
+        yWall = random(0, matrixSize);
+      }
+    }
+    lastWall = millis();
+    matrix[xWall][yWall] = 1;
+    lc.setLed(0, xWall, yWall, matrix[xWall][yWall]);
+  }
+  if (millis() - lastWall > wallTime[currentLevel - 1])
+  {
+    matrix[xWall][yWall] = 0;
+    lc.setLed(0, xWall, yWall, matrix[xWall][yWall]);
+    xWall = -1;
+    yWall = -1;
+  }
+}
+
+void generateScoreBoost()
+{
+  if (millis() - lastBoost > boostInterval)
+  {
+    if (xBoost == -1 || yBoost == -1)
+    {
+      xBoost = random(0, matrixSize);
+      yBoost = random(0, matrixSize);
+      while (matrix[xBoost][yBoost] == 1 || (xBoost == xPos && yBoost == yPos))
+      {
+        xBoost = random(0, matrixSize);
+        yBoost = random(0, matrixSize);
+      }
+    }
+    lastBoost = millis();
+    lastBoostBlink = millis();
+  }
+}
+
 void blinkCurrentPos()
 {
-  Serial.println("vlad");
   if (millis() - lastLedBlink > blinkLedInterval)
   {
-    Serial.print("timpul: ");
-    Serial.println((double)lastLedBlink);
     matrix[xPos][yPos] = !matrix[xPos][yPos];
     lastLedBlink = millis();
     lc.setLed(0, xPos, yPos, matrix[xPos][yPos]);
   }
 }
+
+void blinkCurrentBoost()
+{
+  if (millis() - lastBoost < boostTime[currentLevel - 1])
+  {
+    if (millis() - lastBoostBlink > blinkBoostInterval && xBoost != -1 && yBoost != -1)
+    {
+      matrix[xBoost][yBoost] = !matrix[xBoost][yBoost];
+      lastBoostBlink = millis();
+      lc.setLed(0, xBoost, yBoost, matrix[xBoost][yBoost]);
+    }
+  }
+  else
+  {
+    matrix[xBoost][yBoost] = 0;
+    lc.setLed(0, xBoost, yBoost, matrix[xBoost][yBoost]);
+    xBoost = -1;
+    yBoost = -1;
+  }
+}
+
 void updateDisplay() {
   for (int row = 0; row < matrixSize; row++)
   {
     for (int col = 0; col < matrixSize; col++)
     {
       lc.setLed(0, row, col, matrix[row][col]);
+    }
+  }
+}
+
+void lightDisplay()
+{
+  for (int row = 0; row < matrixSize; row++)
+  {
+    for (int col = 0; col < matrixSize; col++)
+    {
+      lc.setLed(0, row, col, 1);
     }
   }
 }
@@ -987,17 +1317,11 @@ void updatePositions() {
     if (xPos > 0) {
       xPos--;
     }
-    else {
-      xPos = matrixSize - 1;
-    }
   }
 
   if (xValue > maxThreshold) {
     if (xPos < matrixSize - 1) {
       xPos++;
-    }
-    else {
-      xPos = 0;
     }
   }
 
@@ -1007,23 +1331,26 @@ void updatePositions() {
       if (yPos > 0) {
         yPos--;
       }
-      else {
-        yPos = matrixSize - 1;
-      }
     }
 
     if (yValue < minThreshold) {
       if (yPos < matrixSize - 1) {
         yPos++;
       }
-      else {
-        yPos = 0;
-      }
     }
   }
-  if ((xLastPos != xPos || yLastPos != yPos) && matrix[xPos][yPos] == 0) {
+  if ((xLastPos != xPos || yLastPos != yPos) && (xPos == xBoost && yPos == yBoost))
+  {
+    matrix[xBoost][yBoost] = 0;
+    xBoost = -1;
+    yBoost = -1;
+    totalScore -= boostScore[currentLevel - 1];
     matrixChanged = true;
-    if (xPos != endXPos || yPos != endYPos)
+    matrix[xLastPos][yLastPos] = 0;
+  }
+  else if ((xLastPos != xPos || yLastPos != yPos) && matrix[xPos][yPos] == 0) {
+    matrixChanged = true;
+    if (xPos != endXPos[currentLevel - 1][currentMap] || yPos != endYPos[currentLevel - 1][currentMap])
       matrix[xPos][yPos] = 1;
     matrix[xLastPos][yLastPos] = 0;
   }
