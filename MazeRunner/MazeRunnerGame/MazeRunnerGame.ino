@@ -7,6 +7,7 @@ const char authorName[] = "Ciorica Vlad";
 const char githubLink[] = "github.com/vladciorica/MazeRunner";
 
 // pins
+const int buzzerPin = 13;
 const int  dinPin = 12;
 const int  clockPin = 11;
 const int  loadPin = 10;
@@ -77,7 +78,7 @@ byte up[8] = {
 };
 
 // menu settings stuff
-const int  settingsSize = 7;
+const int  settingsSize = 8;
 cursorPosition settingsCursorPos[settingsSize];
 int currentSettingsPos = 0, lastSettingsPos = 0;
 char currentUser[5] = "AAA\0";
@@ -109,7 +110,6 @@ struct cursorPosition1 {
 };
 // menu highscore stuff
 
-const int  max_value = 10000;
 int highScore[3] = {0, 0, 0};
 char highScoreNames[3][4] = {"UNK", "UNK", "UNK"};
 int currentScorePos = 0;
@@ -161,19 +161,19 @@ int currentMap = 0;
 bool inMenu = true;
 bool inGame = false;
 int blinkInterval = 300;
-long long lastBlink = 0;
+long long int lastBlink = 0;
 
 long long int lastBoost = 0;
 long long int lastBoostBlink = 0;
 int  blinkBoostInterval = 100;
-const int boostTime[] = {1500, 1500, 1250, 1000, 1000};
-const int boostInterval = 2000;
+const int boostTime[] = {1500, 1250, 1000, 750, 750};
+const int boostInterval = 1550;
 const int boostScore[] = {100, 200, 300, 400, 550};
 short int xBoost = -1, yBoost = -1;
 
 long long int lastWall = 0;
-const int wallIntervals[] = {2000, 1750, 1500, 1250, 1000};
-const int wallTime[] = {1500, 1500, 1250, 1000, 750};
+const int wallIntervals[] = {1500, 1250, 1250, 1000, 1000};
+const int wallTime[] = {1250, 1000, 1000, 750, 750};
 short int xWall = -1, yWall = -1;
 
 
@@ -183,12 +183,20 @@ bool blinkState = false;
 int EEPROMNameAddress = 6;
 int EEPROMSettingsAddress = 16;
 
+const int endGameSound = 500;
+const int boostSound = 1000;
+const int endLevelSound = 500;
+const int soundBoostDuration = 150;
+const int soundEndDuration = 1000;
+bool sound = true;
+
 void setup() {
   pinMode(brightnessPin, OUTPUT);
   pinMode(contrastPin, OUTPUT);
   pinMode(swPin, INPUT_PULLUP);
   pinMode(xPin, INPUT);
   pinMode(yPin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
 
   Serial.begin(9600);
   loadDataEEPROM();
@@ -262,8 +270,12 @@ void cursorsSetup()
   strcpy(settingsCursorPos[5].Name, "Clear Score");
   settingsCursorPos[6].lcdRow = 0;
   settingsCursorPos[6].lcdCol = 0;
-  settingsCursorPos[6].Name = new char[strlen("Back: ") + 1];
-  strcpy(settingsCursorPos[6].Name, "Back");
+  settingsCursorPos[6].Name = new char[strlen("Volume: ") + 1];
+  strcpy(settingsCursorPos[6].Name, "Volume: ");
+  settingsCursorPos[7].lcdRow = 1;
+  settingsCursorPos[7].lcdCol = 0;
+  settingsCursorPos[7].Name = new char[strlen("Back: ") + 1];
+  strcpy(settingsCursorPos[7].Name, "Back");
   scoreCursorPos[0].lcdRow = 0;
   scoreCursorPos[0].lcdCol = 0;
   scoreCursorPos[1].lcdRow = 1;
@@ -449,6 +461,10 @@ void displayMenu() {
       totalScore = (currentLevel - 1) * 2000;
       xPos = startXPos[currentLevel - 1][0];
       yPos = startYPos[currentLevel - 1][0];
+      xWall = -1;
+      yWall = -1;
+      xBoost = -1;
+      yBoost = -1;
       scoreUpdated = false;
       newHighScore = false;
       // waitAnimationDisplay
@@ -498,9 +514,14 @@ void displayMenu() {
             currentCursorMenuPos = lastcurrentCursorMenuPos;
             return;
           }
-          else if (currentSettingsPos == settingsSize - 2)
+          else if (currentSettingsPos == settingsSize - 3)
           {
             clearHighScore();
+          }
+          else if (currentSettingsPos == settingsSize - 2)
+          {
+            lcd.clear();
+            sound = !sound;
           }
           else
           {
@@ -646,9 +667,6 @@ void displayScore()
 // here we update the scores
 void updateScore()
 {
-  for (int i = 0 ; i < 3; i++)
-    Serial.println(highScoreNames[i]);
-  Serial.println(currentUser);
   for (int i = 0 ; i < scoresSize - 1; i++)
   {
     // if final score is lower that the score from highScore or it is not updated at all, we move all the scores down, and put on the current position the final score
@@ -672,7 +690,6 @@ void updateScore()
   }
   for (int i = 0 ; i < scoresSize - 1; i++)
   {
-    Serial.println(highScoreNames[i]);
     writeStringToEEPROM(i * 3 + EEPROMNameAddress, highScoreNames[i]);
   }
 }
@@ -807,6 +824,8 @@ void printGame()
   lcd.setCursor(0, 0);
   lcd.print("Level: ");
   lcd.print(currentLevel);
+  lcd.print(" ");
+  lcd.print(currentUser);
   lcd.setCursor(0, 1);
   lcd.print("Score: ");
   lcd.print(currentScore);
@@ -820,7 +839,6 @@ void printBeforeGame()
   lcd.setCursor(2, 1);
   lcd.print(startGameMessage2);
   lcd.print(currentLevel);
-  //Serial.println(gameScore);
 }
 
 // here we print the infos at the end of the game
@@ -883,13 +901,13 @@ void displayGame()
     if (buttonPressed() == true)
     {
       lcd.clear();
+      generateMatrix();
       gameStarted = true;
       gameEnded = false;
       gameScore = 0;
       startScore = millis() / 10;
       xBoost = -1;
       yBoost = -1;
-      generateMatrix();
       lastLedBlink = millis();
       lastBoost = millis();
       lastWall = millis();
@@ -898,6 +916,11 @@ void displayGame()
   }
   else
   {
+    /*Serial.print("In nivel: ");
+      Serial.println((int)millis() - (int)lastWall);
+      for (int i = 0 ; i < 3; i++)
+      Serial.println(highScoreNames[i]);
+    */
     printGame();
   }
 }
@@ -1074,6 +1097,13 @@ void printSettings()
       lcd.print(brightnessValue);
     else if (i == 4)
       lcd.print(matrixBrightnessValue);
+    else if (i == 6)
+    {
+      if (sound == true)
+        lcd.print("ON");
+      else
+        lcd.print("OFF");
+    }
   }
   if (lastSettingsPos < settingsSize - 2)
   {
@@ -1176,13 +1206,13 @@ void loop() {
       if (currentMap < numberOfMaps[currentLevel - 1] - 1)
       {
         currentMap++;
+        generateMatrix();
         xBoost = -1;
         yBoost = -1;
         xWall = -1;
         yWall = -1;
         lastBoost = millis();
         lastWall = millis();
-        generateMatrix();
       }
       else // otherwise if we have levels to complete we go to the next level
       {
@@ -1193,6 +1223,14 @@ void loop() {
           gameStarted = false;
           totalScore += gameScore;
           currentMap = 0;
+          xBoost = -1;
+          yBoost = -1;
+          xWall = -1;
+          yWall = -1;
+          lastBoost = millis();
+          lastWall = millis();
+          if (sound == true)
+            tone(buzzerPin, endLevelSound, soundEndDuration);
         }
         else // otherwise we finish the game
         {
@@ -1202,6 +1240,8 @@ void loop() {
           currentLevel = 1;
           totalScore += gameScore;
           currentMap = 0;
+          if (sound == true)
+            tone(buzzerPin, endGameSound, soundEndDuration);
         }
       }
     }
@@ -1216,7 +1256,7 @@ void loop() {
       }
       generateScoreBoost(); // generate a score boost at a random position
       generateWalls(); // generate a wall at a random position
-      blinkCurrentBoost(); 
+      blinkCurrentBoost();
       blinkCurrentPos();
       // if we moved on the matrix then we have to update the led matrix
       if (matrixChanged == true)
@@ -1234,15 +1274,12 @@ void generateWalls()
   // generate a wall at a certain time interval
   if (millis() - lastWall > wallIntervals[currentLevel - 1])
   {
-    if (xWall == -1 || yWall == -1)
+    xWall = random(0, matrixSize);
+    yWall = random(0, matrixSize);
+    while (matrix[xWall][yWall] == 1 || (xWall == xPos && yWall == yPos) || (xWall == xBoost && yWall == yBoost))
     {
       xWall = random(0, matrixSize);
       yWall = random(0, matrixSize);
-      while (matrix[xWall][yWall] == 1 || (xWall == xPos && yWall == yPos) || (xWall == xBoost && yWall == yBoost))
-      {
-        xWall = random(0, matrixSize);
-        yWall = random(0, matrixSize);
-      }
     }
     lastWall = millis();
     matrix[xWall][yWall] = 1;
@@ -1251,10 +1288,13 @@ void generateWalls()
   // the wall stays on the map a certain moment of time
   if (millis() - lastWall > wallTime[currentLevel - 1])
   {
-    matrix[xWall][yWall] = 0;
-    lc.setLed(0, xWall, yWall, matrix[xWall][yWall]);
-    xWall = -1;
-    yWall = -1;
+    if (xWall >= 0 && xWall < matrixSize && yWall >= 0 && yWall < matrixSize)
+    {
+      matrix[xWall][yWall] = 0;
+      lc.setLed(0, xWall, yWall, matrix[xWall][yWall]);
+      xWall = -1;
+      yWall = -1;
+    }
   }
 }
 
@@ -1263,15 +1303,12 @@ void generateScoreBoost()
   // generate a score boost at a certain time interval
   if (millis() - lastBoost > boostInterval)
   {
-    if (xBoost == -1 || yBoost == -1)
+    xBoost = random(0, matrixSize);
+    yBoost = random(0, matrixSize);
+    while (matrix[xBoost][yBoost] == 1 || (xBoost == xPos && yBoost == yPos))
     {
       xBoost = random(0, matrixSize);
       yBoost = random(0, matrixSize);
-      while (matrix[xBoost][yBoost] == 1 || (xBoost == xPos && yBoost == yPos))
-      {
-        xBoost = random(0, matrixSize);
-        yBoost = random(0, matrixSize);
-      }
     }
     lastBoost = millis();
     lastBoostBlink = millis();
@@ -1303,10 +1340,13 @@ void blinkCurrentBoost()
   }
   else
   {
-    matrix[xBoost][yBoost] = 0;
-    lc.setLed(0, xBoost, yBoost, matrix[xBoost][yBoost]);
-    xBoost = -1;
-    yBoost = -1;
+    if (xBoost >= 0 && xBoost < matrixSize && yBoost >= 0 && yBoost < matrixSize)
+    {
+      matrix[xBoost][yBoost] = 0;
+      lc.setLed(0, xBoost, yBoost, matrix[xBoost][yBoost]);
+      xBoost = -1;
+      yBoost = -1;
+    }
   }
 }
 
@@ -1383,6 +1423,8 @@ void updatePositions() {
     totalScore -= boostScore[currentLevel - 1];
     matrixChanged = true;
     matrix[xLastPos][yLastPos] = 0;
+    if (sound == true)
+      tone(buzzerPin, boostSound, soundBoostDuration);
   }
   // if we can go to this position
   else if ((xLastPos != xPos || yLastPos != yPos) && matrix[xPos][yPos] == 0) {
