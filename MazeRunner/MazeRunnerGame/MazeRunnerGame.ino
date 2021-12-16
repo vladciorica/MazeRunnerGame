@@ -77,6 +77,17 @@ byte up[8] = {
   B00000,
 };
 
+byte smiley[8] = {
+  B00111100,
+  B01000010,
+  B10100101,
+  B10000001,
+  B10100101,
+  B10011001,
+  B01000010,
+  B00111100
+};
+
 // menu settings stuff
 const int  settingsSize = 8;
 cursorPosition settingsCursorPos[settingsSize];
@@ -189,6 +200,7 @@ const int endLevelSound = 500;
 const int soundBoostDuration = 150;
 const int soundEndDuration = 1000;
 bool sound = true;
+bool firstTime = true;
 
 void setup() {
   pinMode(brightnessPin, OUTPUT);
@@ -347,7 +359,7 @@ void loadDataEEPROM()
     strcpy(currentUser, readStringFromEEPROM(EEPROMSettingsAddress));
   else
     strcpy(currentUser, "AAA");
-  for (int i = 19; i < 25; i = i + 2)
+  for (int i = 19; i < 25; i = i + 2) // addresses for the contrast, brightness and matrix brightness
   {
     EEPROMvalue = readIntFromEEPROM(i);
     if (i == 19)
@@ -538,6 +550,7 @@ void displayMenu() {
           userCol = 6;
           updateSettings();
           clearDisplay();
+          firstTime = true;
         }
       }
       if (lockedIn == false)
@@ -883,6 +896,7 @@ void displayGame()
     {
       lcd.clear();
       currentCursorMenuPos = lastcurrentCursorMenuPos;
+      firstTime = true;
       gameEnded = false;
       gameStarted = false;
       inGame = false;
@@ -1188,6 +1202,11 @@ void loop() {
 
   //display logic
   // create menu for the game
+  if(inGame == false && firstTime == true)
+  {
+    firstTime = false;
+    printByte(smiley);
+  }
   if (inMenu == true) {
     displayMenu();
   }
@@ -1437,5 +1456,15 @@ void updatePositions() {
   {
     xPos = xLastPos;
     yPos = yLastPos;
+  }
+}
+
+
+void printByte(byte character [])
+{
+  int i = 0;
+  for (i = 0; i < 8; i++)
+  {
+    lc.setRow(0, i, character[i]);
   }
 }
