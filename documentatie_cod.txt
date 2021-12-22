@@ -1,0 +1,16 @@
+Avem 2 variabile inMenu si inGame ce ne spun starea in care ne aflam
+
+Daca ne aflam in meniu, atunci avem o functie displayMenu ce ne afiseaza meniul. In interiorul acestei functii avem mai multe cazuri, putem fi ori in meniul principal ori intr-una din sectiunile sale.
+Pentru a verifica acest lucru avem pastrata mereu pozitia cursorului din meniul principal. Daca pozitia sa este intre 1 si 4, atunci suntem in meniul principal, altfel daca este -1 inseamna ca suntem intrati intr-o alta categorie.
+
+In fiecare categorie, inclusiv meniul principal, avem un vector ce contine obiecte cu pozitia cursorului si numele campului.
+
+Pentru a ne deplasa cu cursorul, cu ajutorul joystickului am facut o functie in care ne plimbam cu pozitia curenta prin vectorul nostru de obiecte, si afisam cele necesare pentru pagina curenta din meniu.
+
+Atunci cand variabila inGame este activata (la apasarea butonului de start) inseamna ca vom incepe jocul, iar meniul va afisa pagina necesara pentru joc.
+Cat timp suntem in interiorul jocului, vom afisa nivelul numele si punctajul.
+Scorul este determinat de timpul la care am incheiat jocul - timpul la care am inceput jocul. Impartim timpul la 10 pentru a avea valori mai normale, si o crestere mai lenta.
+
+Cand suntem in joc, avem 2 alte variabile gameStarted si gameEnded, care ne zic daca suntem in pagina de asteptare dintre nivele sau efectiv in joc, si daca am terminat ultimul nivel si ne intoarcem la meniul principal sau nu.
+Cat timp suntem in joc se genereaza pereti si potiuni de scor la pozitii generate random, la intervale fixe de timp. Daca gameStarted devine false inseamna ca ori am terminat jocul complet, ori am terminat nivelul, ori am terminat camera curenta din nivelul curent. In functie de momentul actual facem actualizarile necesare.
+

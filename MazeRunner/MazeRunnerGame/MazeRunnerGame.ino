@@ -47,47 +47,6 @@ int lastcurrentCursorMenuPos = 0;
 long long lastScroll = 0;
 int scrollInterval = 500;
 
-byte arrow[8] = {
-  B11000,
-  B01100,
-  B00110,
-  B00011,
-  B00110,
-  B01100,
-  B11000,
-};
-
-byte down[8] = {
-  B00000,
-  B00000,
-  B00000,
-  B00000,
-  B10001,
-  B01010,
-  B00100,
-};
-
-byte up[8] = {
-  B00100,
-  B01010,
-  B10001,
-  B00000,
-  B00000,
-  B00000,
-  B00000,
-};
-
-byte smiley[8] = {
-  B00111100,
-  B01000010,
-  B10100101,
-  B10000001,
-  B10100101,
-  B10011001,
-  B01000010,
-  B00111100
-};
-
 // menu settings stuff
 const int  settingsSize = 8;
 cursorPosition settingsCursorPos[settingsSize];
@@ -201,6 +160,47 @@ const int soundBoostDuration = 150;
 const int soundEndDuration = 1000;
 bool sound = true;
 bool firstTime = true;
+
+byte arrow[matrixSize] = {
+  B11000,
+  B01100,
+  B00110,
+  B00011,
+  B00110,
+  B01100,
+  B11000,
+};
+
+byte down[matrixSize] = {
+  B00000,
+  B00000,
+  B00000,
+  B00000,
+  B10001,
+  B01010,
+  B00100,
+};
+
+byte up[matrixSize] = {
+  B00100,
+  B01010,
+  B10001,
+  B00000,
+  B00000,
+  B00000,
+  B00000,
+};
+
+byte smiley[matrixSize] = {
+  B00111100,
+  B01000010,
+  B10100101,
+  B10000001,
+  B10100101,
+  B10011001,
+  B01000010,
+  B00111100
+};
 
 void setup() {
   pinMode(brightnessPin, OUTPUT);
@@ -387,7 +387,8 @@ void loadDataEEPROM()
 }
 
 // function that will print the menu data
-void printMenu() {
+void printMenu()
+{
   for (int i = 0 ; i < menuPositionsSize; i++)
   {
     lcd.setCursor(menuCursorPos[i].lcdCol + 1, menuCursorPos[i].lcdRow);
@@ -398,20 +399,23 @@ void printMenu() {
 }
 
 // function that will help us to navigate through the menu
-void moveMenuCursor() {
+void moveMenuCursor()
+{
   int xValue = analogRead(xPin);
   int yValue = analogRead(yPin);
 
   int lastPos = currentCursorMenuPos;
 
-  if (xValue < minThreshold) {
+  if (xValue < minThreshold)
+  {
     if (currentCursorMenuPos == 3)
       currentCursorMenuPos = 0;
     if (currentCursorMenuPos == 2)
       currentCursorMenuPos = 1;
   }
 
-  if (xValue > maxThreshold) {
+  if (xValue > maxThreshold)
+  {
     if (currentCursorMenuPos == 0)
       currentCursorMenuPos = 3;
     if (currentCursorMenuPos == 1)
@@ -420,14 +424,16 @@ void moveMenuCursor() {
 
   if (lastPos == currentCursorMenuPos)
   {
-    if (yValue > maxThreshold) {
+    if (yValue > maxThreshold)
+    {
       if (currentCursorMenuPos == 1)
         currentCursorMenuPos = 0;
       if (currentCursorMenuPos == 2)
         currentCursorMenuPos = 3;
     }
 
-    if (yValue < minThreshold) {
+    if (yValue < minThreshold)
+    {
       if (currentCursorMenuPos == 0)
         currentCursorMenuPos = 1;
       if (currentCursorMenuPos == 3)
@@ -604,7 +610,8 @@ void moveScoreCursor()
 
   int lastPos = currentScorePos;
 
-  if (xValue < minThreshold && joyMoved == false) {
+  if (xValue < minThreshold && joyMoved == false)
+  {
     if (currentScorePos > 0)
     {
       currentScorePos--;
@@ -612,7 +619,8 @@ void moveScoreCursor()
     }
   }
 
-  if (xValue > maxThreshold && joyMoved == false) {
+  if (xValue > maxThreshold && joyMoved == false)
+  {
     if (currentScorePos < scoresSize - 1)
     {
       currentScorePos++;
@@ -822,10 +830,6 @@ void generateMatrix() //generate matrix for the new level
       copyMatrix(levelStartMatrixAux);
     }
   }
-  /*for (int i = 0 ; i < matrixSize; i++)
-      for (int j = 0; j < matrixSize; j++)
-        matrix[i][j] = levelStartMatrix[currentLevel - 1][currentMap][i][j];
-  */
 
   updateDisplay();
 }
@@ -965,12 +969,14 @@ void modifySettings()
 
     int lastCol = userCol;
 
-    if (yValue < minThreshold && joyMoved2 == false) {
+    if (yValue < minThreshold && joyMoved2 == false)
+    {
       userCol++;
       joyMoved2 = true;
     }
 
-    if (yValue > maxThreshold && joyMoved2 == false) {
+    if (yValue > maxThreshold && joyMoved2 == false)
+    {
       userCol--;
       joyMoved2 = true;
     }
@@ -986,12 +992,14 @@ void modifySettings()
 
     if (userCol == lastCol)
     {
-      if (xValue < minThreshold && joyMoved == false) {
+      if (xValue < minThreshold && joyMoved == false)
+      {
         auxName[userCol - 6]++;
         joyMoved = true;
       }
 
-      if (xValue > maxThreshold && joyMoved == false) {
+      if (xValue > maxThreshold && joyMoved == false)
+      {
         auxName[userCol - 6]--;
         joyMoved = true;
       }
@@ -1014,7 +1022,8 @@ void modifySettings()
     }
   }
   // otherwise we have to change and integer value
-  else {
+  else
+  {
     if (currentSettingsPos == 1)
       auxValue = currentLevel;
     if (currentSettingsPos == 2)
@@ -1138,7 +1147,8 @@ void moveSettingsCursor()
   int yValue = analogRead(yPin);
 
   int lastPos = currentSettingsPos;
-  if (xValue < minThreshold && joyMoved == false) {
+  if (xValue < minThreshold && joyMoved == false)
+  {
     if (currentSettingsPos > 0)
     {
       currentSettingsPos--;
@@ -1146,7 +1156,8 @@ void moveSettingsCursor()
     }
   }
 
-  if (xValue > maxThreshold && joyMoved == false) {
+  if (xValue > maxThreshold && joyMoved == false)
+  {
     if (currentSettingsPos < settingsSize - 1)
     {
       currentSettingsPos++;
@@ -1202,7 +1213,7 @@ void loop() {
 
   //display logic
   // create menu for the game
-  if(inGame == false && firstTime == true)
+  if (inGame == false && firstTime == true)
   {
     firstTime = false;
     printByte(smiley);
@@ -1293,6 +1304,7 @@ void generateWalls()
   // generate a wall at a certain time interval
   if (millis() - lastWall > wallIntervals[currentLevel - 1])
   {
+    randomSeed(analogRead(xPin));
     xWall = random(0, matrixSize);
     yWall = random(0, matrixSize);
     while (matrix[xWall][yWall] == 1 || (xWall == xPos && yWall == yPos) || (xWall == xBoost && yWall == yBoost))
@@ -1322,6 +1334,7 @@ void generateScoreBoost()
   // generate a score boost at a certain time interval
   if (millis() - lastBoost > boostInterval)
   {
+    randomSeed(analogRead(xPin));
     xBoost = random(0, matrixSize);
     yBoost = random(0, matrixSize);
     while (matrix[xBoost][yBoost] == 1 || (xBoost == xPos && yBoost == yPos))
@@ -1407,28 +1420,36 @@ void updatePositions() {
   xLastPos = xPos;
   yLastPos = yPos;
 
-  if (xValue < minThreshold) {
-    if (xPos > 0) {
+  if (xValue < minThreshold)
+  {
+    if (xPos > 0)
+    {
       xPos--;
     }
   }
 
-  if (xValue > maxThreshold) {
-    if (xPos < matrixSize - 1) {
+  if (xValue > maxThreshold)
+  {
+    if (xPos < matrixSize - 1)
+    {
       xPos++;
     }
   }
 
   if (xPos == xLastPos)
   {
-    if (yValue > maxThreshold) {
-      if (yPos > 0) {
+    if (yValue > maxThreshold)
+    {
+      if (yPos > 0)
+      {
         yPos--;
       }
     }
 
-    if (yValue < minThreshold) {
-      if (yPos < matrixSize - 1) {
+    if (yValue < minThreshold)
+    {
+      if (yPos < matrixSize - 1)
+      {
         yPos++;
       }
     }
@@ -1446,7 +1467,8 @@ void updatePositions() {
       tone(buzzerPin, boostSound, soundBoostDuration);
   }
   // if we can go to this position
-  else if ((xLastPos != xPos || yLastPos != yPos) && matrix[xPos][yPos] == 0) {
+  else if ((xLastPos != xPos || yLastPos != yPos) && matrix[xPos][yPos] == 0)
+  {
     matrixChanged = true;
     if (xPos != endXPos[currentLevel - 1][currentMap] || yPos != endYPos[currentLevel - 1][currentMap])
       matrix[xPos][yPos] = 1;
@@ -1463,7 +1485,7 @@ void updatePositions() {
 void printByte(byte character [])
 {
   int i = 0;
-  for (i = 0; i < 8; i++)
+  for (i = 0; i < matrixSize; i++)
   {
     lc.setRow(0, i, character[i]);
   }
